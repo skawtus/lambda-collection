@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/secretagentsnowman/snowpull.svg)](https://travis-ci.org/secretagentsnowman/snowpull)
+
 snowpull
 ========
 
