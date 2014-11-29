@@ -6,3 +6,5 @@ snowpull
 __pulls, and sorts, and stores incoming 'snowball' messages (a SQS queue).__
 
 ![Snowpull](snowpull.jpg)
+
+-  Validates incoming messages correspond to a valid Group in using [Amazon Identity and Access Management (IAM)](http://aws.amazon.com/iam/).
