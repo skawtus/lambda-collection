@@ -48,7 +48,8 @@ function handle_messages(req, res, data, callback){
 
 function store(content){
     //debugger;
-    //TODO store this message...
+    //TODO store this message... validating incoming messages correspond to a valid 'group'/'account'
+
 }
 
 function delete_queue_messages(req,res,msgs, callback){
