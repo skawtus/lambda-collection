@@ -3,14 +3,12 @@ var router = express.Router();
 var AWS = require('aws-sdk');
 var DEBUG = true;
 
-
+var sqs = new AWS.SQS({
+    apiVersion: '2012-11-05',
+    region: 'us-west-2'
+});
 
 function notify_arrival(req,res,callback){
-
-    var sqs = new AWS.SQS({
-        apiVersion: '2012-11-05',
-        region: 'us-west-2'
-    });
 
     var params = {
         QueueUrl: process.env.SNOWBALL_QUEUE, /* required */
@@ -18,7 +16,7 @@ function notify_arrival(req,res,callback){
             'All'
         ],
         MaxNumberOfMessages: 10,
-        VisibilityTimeout: 0,
+        VisibilityTimeout: 1,
         WaitTimeSeconds: 0
     };
     sqs.receiveMessage(params,  function(err, data) {
@@ -27,7 +25,6 @@ function notify_arrival(req,res,callback){
             res.json([err,err.stack]);
         }
         else {
-            //console.log(data);
             callback(req,res, data);
         }
     });
@@ -38,44 +35,55 @@ function handle_messages(req, res, data, callback){
 
     _.each(data.Messages, function(message){
         var c = JSON.parse(message.Body);
-        if( !("a" in c.query) || store(c)) {
-            delete_queue_message(message)
+        if( !("a" in c.query)) {
+            store(c);
         }
     });
 
-    callback(req,res);
+    if( "Messages" in data )
+        delete_queue_messages(req,res,data.Messages,callback);
+    else
+        callback(req,res,["Queue empty"]);
 }
 
 function store(content){
     //debugger;
     //TODO store this message...
-    return false;
 }
 
-function delete_queue_message(msg){
+function delete_queue_messages(req,res,msgs, callback){
 
-    var sqs = new AWS.SQS({
-        apiVersion: '2012-11-05',
-        region: 'us-west-2'
-    });
     var params = {
         QueueUrl: process.env.SNOWBALL_QUEUE,
-        ReceiptHandle: msg.ReceiptHandle
+        Entries: []
     };
-    sqs.deleteMessage(params, function(err, data) {
-        if (err) console.log(err, err.stack); // an error occurred
-        else     console.log(data);           // successful response
+
+    var ctr=0;
+    _.each(msgs, function(msg){
+        params.Entries.push({
+           Id: (ctr++).toString(),
+           ReceiptHandle: msg.ReceiptHandle
+        });
+    });
+
+    sqs.deleteMessageBatch(params, function(err, data) {
+        if (err) {
+            console.log(err, err.stack);
+            res.json([err,err.stack]);
+        }
+        else {
+            console.log(data);
+            callback(req,res, data);
+        }
     });
 }
 
 router.get('/', function(req, res) {
     notify_arrival(req,res,function(req,res,data){
-        handle_messages(req, res, data, function(req,res){
-
-            if(DEBUG) res.json(["Ok"]);  //respond outside of handler for quickness
+        handle_messages(req, res, data, function(req,res, data){
+            res.json(data);  //respond outside of handler for quickness
         });
     });
-    if(!DEBUG) res.json(["Ok"]);
 });
 
 module.exports = router;
