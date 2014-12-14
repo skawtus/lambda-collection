@@ -5,6 +5,14 @@ var sqs = new AWS.SQS({
     region: 'us-west-2'
 });
 
+function notified(data){
+    delete_queue_messages(data, function(data){
+        if( data.Successful !== undefined && data.Successful.length > 0) {
+            notify_arrival(notified);
+        }
+    });
+}
+
 function notify_arrival(callback){
 
     var params = {
@@ -26,7 +34,6 @@ function notify_arrival(callback){
     });
 
 }
-exports.notify_arrival = notify_arrival;
 
 function delete_queue_messages(data, callback){
 
@@ -44,7 +51,7 @@ function delete_queue_messages(data, callback){
 
     data.Messages.forEach( function(msg){
         params.Entries.push({
-            Id: (ctr++).toString(),
+            Id: msg.MessageId,
             ReceiptHandle: msg.ReceiptHandle
         });
     });
@@ -55,26 +62,22 @@ function delete_queue_messages(data, callback){
             console.log(err, err.stack);
         }
         else {
-            console.log(data);
+            console.log( JSON.stringify({
+                context: "sqs.deleteMessageBatch",
+                data: data
+            }, null, '  '));
             callback(data);
         }
     });
 }
-exports.delete_queue_messages =  delete_queue_messages;
 
-exports.handler = function(event, context) {
-
+function handler(event, context) {
     console.log(JSON.stringify(event, null, '  '));
-
-    function notified(data){
-        delete_queue_messages(data, function(data){
-            console.log("DELETE QUEUE MESSAGE: " + JSON.stringify(data, null, '  '));
-            if( data.Successful !== undefined && data.Successful.length > 0) {
-                notify_arrival(notified);
-            }
-
-        });
-    }
-
     notify_arrival( notified );
 };
+
+
+exports.delete_queue_messages =  delete_queue_messages;
+exports.notify_arrival = notify_arrival;
+exports.handler = handler;
+
