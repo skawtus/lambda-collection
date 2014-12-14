@@ -4,16 +4,24 @@ var sqs = new AWS.SQS({
     apiVersion: '2012-11-05',
     region: 'us-west-2'
 });
+var lambda = new AWS.Lambda({
+    apiVersion: '2014-11-11',
+    region: 'us-west-2'
+})
 
-function notified(data){
-    delete_queue_messages(data, function(data){
-        if( data.Successful !== undefined && data.Successful.length > 0) {
-            notify_arrival(notified);
-        }
-    });
+function notified(data, context){
+    process_queue_messages(data, function(data){
+        delete_queue_messages(data, function(data){
+            if( data.Successful !== undefined && data.Successful.length > 0) {
+                notify_arrival(notified, context);
+            } else {
+                context.done(null,'No messages left to process');
+            }
+        });
+    })
 }
 
-function notify_arrival(callback){
+function notify_arrival(callback, context){
 
     var params = {
         QueueUrl: process.env.SNOWBALL_QUEUE, /* required */
@@ -27,11 +35,28 @@ function notify_arrival(callback){
     sqs.receiveMessage(params,  function(err, data) {
         if (err) {
             console.log(err, err.stack);
+            context.done(null,'no messages received.');
         }
         else {
-            callback(data);
+            callback(data,context);
         }
     });
+
+}
+
+function process_queue_messages(data, callback){
+//
+//    //trigger lambda function for saving messages
+//    var params = {
+//        Marker: 'STRING_VALUE',
+//        MaxItems: 0
+//    };
+//    lambda.listFunctions(params, function(err, data) {
+//        if (err) console.log(err, err.stack); // an error occurred
+//        else     console.log(data);           // successful response
+//    })
+
+    callback(data);
 
 }
 
@@ -42,11 +67,8 @@ function delete_queue_messages(data, callback){
         Entries: []
     };
 
-    var ctr=0;
-
     if( data.Messages === undefined ){
-        callback({});
-        return;
+        return callback({});
     }
 
     data.Messages.forEach( function(msg){
@@ -73,7 +95,7 @@ function delete_queue_messages(data, callback){
 
 function handler(event, context) {
     console.log(JSON.stringify(event, null, '  '));
-    notify_arrival( notified );
+    notify_arrival( notified, context );
 };
 
 
