@@ -45,17 +45,29 @@ function notify_arrival(callback, context){
 }
 
 function process_queue_messages(data, callback){
-//
-//    //trigger lambda function for saving messages
-//    var params = {
-//        Marker: 'STRING_VALUE',
-//        MaxItems: 0
-//    };
-//    lambda.listFunctions(params, function(err, data) {
-//        if (err) console.log(err, err.stack); // an error occurred
-//        else     console.log(data);           // successful response
-//    })
 
+    if( data.Messages !== undefined){
+        var msgs = [];
+        data.Messages.forEach( function(msg){
+            msgs.push(JSON.parse(msg.Body));
+        });
+        var params = {
+            FunctionName: process.env.PROCESS_FUNCTION, /* required */
+            InvokeArgs: JSON.stringify(msgs) /* required */
+        };
+        lambda.invokeAsync(params, function(err, data) {
+            if (err) {
+                console.log(err, err.stack);
+                context.done(null,'unable to invoke lamba process function.');
+            }
+            else {
+                console.log( JSON.stringify({
+                    context: "lamba.invokeAsync "+process.env.PROCESS_FUNCTION,
+                    data: data
+                }, null, '  '));
+            }
+        });
+    }
     callback(data);
 
 }
