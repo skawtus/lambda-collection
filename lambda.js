@@ -1,6 +1,5 @@
-console.log('Loading event');
-var AWS = require('aws-sdk');
 
+var AWS = require('aws-sdk');
 var sqs = new AWS.SQS({
     apiVersion: '2012-11-05',
     region: 'us-west-2'
@@ -63,7 +62,6 @@ function delete_queue_messages(data, callback){
 
 exports.handler = function(event, context) {
 
-    console.log('Received event:');
     console.log(JSON.stringify(event, null, '  '));
 
     notify_arrival(function(data){
@@ -86,4 +84,4 @@ function notified(data){
     });
 }
 
-notify_arrival( notified )
+notify_arrival( notified );
