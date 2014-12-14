@@ -64,24 +64,15 @@ exports.handler = function(event, context) {
 
     console.log(JSON.stringify(event, null, '  '));
 
-    notify_arrival(function(data){
+    function notified(data){
         delete_queue_messages(data, function(data){
             console.log("DELETE QUEUE MESSAGE: " + JSON.stringify(data, null, '  '));
+            if( data.Successful !== undefined && data.Successful.length > 0) {
+                notify_arrival(notified);
+            }
+
         });
-    })
+    }
+
+    notify_arrival( notified );
 };
-
-
-
-//////////////////////////////////////////
-function notified(data){
-    delete_queue_messages(data, function(data){
-        console.log("DELETE QUEUE MESSAGE: " + JSON.stringify(data, null, '  '));
-        if( data.Successful !== undefined && data.Successful.length > 0) {
-            notify_arrival(notified);
-        }
-
-    });
-}
-
-notify_arrival( notified );
