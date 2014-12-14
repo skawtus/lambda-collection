@@ -7,7 +7,7 @@ __A lambda function meant to run in [AWS Lambda](http://aws.amazon.com/lambda/),
 
 ![Snowpull](snowpull.jpg)
 
--  Pulls messages from  [Amazon Simple Queue Service (SQS)](http://aws.amazon.com/sqs/)
--  Handles the messages (chain of responsibility & decorator pattern) sequentially.
-- Deletes the handled messages from the queue.
+- Pulls messages from  [Amazon Simple Queue Service (SQS)](http://aws.amazon.com/sqs/)
+- Sends found messages to another lambda function, [snowpack](https://github.com/secretagentsnowman/snowpack) for augmentation..
+- Batch deletes the handled messages from the queue.
 
