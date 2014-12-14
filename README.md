@@ -3,10 +3,11 @@
 snowpull
 ========
 
-__pulls, and sorts incoming 'snowball' messages (a SQS queue), and stores them (S3).__
+__A lambda function meant to run in [AWS Lambda](http://aws.amazon.com/lambda/), triggered by incoming [snowball](https://github.com/secretagentsnowman/snowball)__
 
 ![Snowpull](snowpull.jpg)
 
 -  Pulls messages from  [Amazon Simple Queue Service (SQS)](http://aws.amazon.com/sqs/)
--  Validates incoming messages correspond to a valid Group in using [Amazon Identity and Access Management (IAM)](http://aws.amazon.com/iam/).
--  Stores valid messages in [Amazon Simple Storage Service (S3)](http://aws.amazon.com/s3/)
+-  Handles the messages (chain of responsibility & decorator pattern) sequentially.
+- Deletes the handled messages from the queue.
+
