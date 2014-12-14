@@ -6,7 +6,7 @@ snowpull
 __A lambda function that runs in [AWS Lambda](http://aws.amazon.com/lambda/)__
 
 1. triggered by incoming [snowball](https://github.com/secretagentsnowman/snowball) queue
-2. Forwards messages to lambda function (snowpack)[https://github.com/secretagentsnowman/snowpack]
+2. Forwards messages to lambda function [snowpack](https://github.com/secretagentsnowman/snowpack)
 
 ![Snowpull](snowpull.jpg)
 
