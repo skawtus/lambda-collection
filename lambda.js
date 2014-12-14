@@ -26,6 +26,7 @@ function notify_arrival(callback){
     });
 
 }
+exports.notify_arrival = notify_arrival;
 
 function delete_queue_messages(data, callback){
 
@@ -59,6 +60,7 @@ function delete_queue_messages(data, callback){
         }
     });
 }
+exports.delete_queue_messages =  delete_queue_messages;
 
 exports.handler = function(event, context) {
 
