@@ -1,4 +1,4 @@
-data pipeline collection service
+lambda collection
 ========
 
 __A lambda function that runs in [AWS Lambda](http://aws.amazon.com/lambda/)__
